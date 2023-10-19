@@ -1,4 +1,4 @@
-import gspread 
+import gspread
 from google.oauth2.service_account import Credentials
 
 SCOPE = [
@@ -16,11 +16,11 @@ SHEET = GSPREAD_CLIENT.open("love_sandwiches")
 def get_sales_data():
     """
     Get sales figures input from the user.
-    Runa while loop to collect valid string of data from the user 
-    via the terminal, which must be string of 6 numbers seperated 
+    Runa while loop to collect valid string of data from the user
+    via the terminal, which must be string of 6 numbers seperated
     by commas. The loop will repeatedly request data, until it is valid.
     """
-    
+
     while True:
         print("Please enter sales data from the last market.")
         print("Data sholud be six numbers, seperated by the commas.")
@@ -29,12 +29,12 @@ def get_sales_data():
         data_str = input("Enter your data here: \n")
 
         sales_data = data_str.split(",")
-        
+
         if validate_data(sales_data):
             print("Data is valid! ")
             break
 
-    return sales_data        
+    return sales_data
 
 
 def validate_data(values):
@@ -100,9 +100,9 @@ def calculate_surplus_data(sales_row):
     # pprint(stock)
     # stock_row = stock[len(stock)-1]     # first way
     stock_row = stock[-1]                 # second way
-    
+
     # print(f'stock_row: {stock_row}')
-    # print(f'sales row: {sales_row}')    
+    # print(f'sales row: {sales_row}')
 
     # zip functions to iterate over two or more data structure at the same time
     surplus_data = []
@@ -117,7 +117,7 @@ def calculate_surplus_data(sales_row):
 def get_last_5_entries_sales():
     """
     Collects columns of data for sales worksheet,
-    collecting the last 5 entries for each sandwich 
+    collecting the last 5 entries for each sandwich
     and returns the data as a list of lists.
     """
     sales = SHEET.worksheet("sales")
@@ -140,10 +140,10 @@ def calculate_stock_data(data):
         int_column = [int(num) for num in column]
         average = sum(int_column) / len(int_column)
         # stock_num = math.floor(average * 1.10)
-        # new_stock_data.append(round(stock_num))     
+        # new_stock_data.append(round(stock_num))
         stock_num = average * 1.10
         new_stock_data.append(round(stock_num))
-     
+
     return new_stock_data
 
 
@@ -159,7 +159,23 @@ def main():
     sales_colummns = get_last_5_entries_sales()
     stock_data = calculate_stock_data(sales_colummns)
     update_worksheet(stock_data, "stock")
+    return stock_data
 
 
 print("Welcome to Love Sandwiches Data Automation\n")
 main()
+stock_data = main()
+
+def get_stock_values(data):
+    """
+    Print out the calculated stock for oncoming day with names and values
+    """
+    headings = SHEET.worksheet("stock").get_all_values()[0]
+    values = data
+    next_day_market = dict(zip(headings, values))
+    return next_day_market
+
+
+print("Make the following numbers of sandwiches for next market:\n")
+stock_values = get_stock_values(stock_data)
+print(stock_values) 
